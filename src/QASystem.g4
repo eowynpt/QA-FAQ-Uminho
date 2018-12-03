@@ -3,8 +3,6 @@
 //TODOs
 //->(pagar|pagam|pago) não na BdC mas na parte da gramática
 //-> dar skip aos pronomes
-// keywords+
-//decidir palavras+ vs texto
 
 
 grammar QASystem;
@@ -23,23 +21,20 @@ qas: 'BC:' bcQAS 'QUESTOES:' questoes
 questoes: questao+
         ;
 
-questao: TEXTO
+questao: (PALAVRA | tipo | acao | keyword )+ SIMBOLOTERMINAL
        ;
 
 bcQAS: triplo+
      ;
 
-triplo: '(' intencao ';' resposta ';' confianca')'  
+triplo: '(' intencao ';' resposta')'  
       ;
 
-intencao: tipo acao keyword
+intencao: tipo ',' acao ',' keywords
         ;
 
 resposta: TEXTO
         ;
-
-confianca: PERCENT
-         ;
 
 tipo: 'Porquê' | 'O quê' | 'Quando' | 'Onde' | 'Como'
     ;
@@ -47,25 +42,36 @@ tipo: 'Porquê' | 'O quê' | 'Quando' | 'Onde' | 'Como'
 acao: 'aceder' | 'imprimir' | 'inscrever' | 'pagar' //....
     ;
 
+keywords: '[' keyword ( ',' keyword)* ']'
+        ;
 
-keyword: 'propinas' | 'época especial' | 'portal académico' | 'Universidade do Minho' //....
+keyword: 'propinas' | 'época' | 'especial' | 'portal' | 'académico' | 'Universidade' | 'Minho' //....
        ;
 
 /* Definição do Analisador Léxico */         
-TEXTO:    (('\''|'\"') ~('\''|'\"')* ('\''|'\"'));
+TEXTO:    (('\'') ~('\'')* ('\''));
 
 fragment LETRA : [a-zA-ZáéíóúÁÉÍÓÚÃãÕõâêôÂÊÔÀÈÌÒÙàèìòùÇç] ;
 
-fragment SIMBOLO : [?.!-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
+fragment DIGITO: [0-9];
+
+fragment SIMBOLO : [-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
 
 SIMBOLOTERMINAL: [?.!];
 
-/*FRASE: (LETRA| DIGITO | SIMBOLO)+;*/
+PALAVRA: (LETRA | DIGITO | SIMBOLO)+;
 
-NUMERO: ('0'..'9')+ ;
+fragment pronomes: 
+                 ;
+                     
+fragment proposicoes: ('a' | 'ante' | 'após' | 'até' | 'com' | 'contra' | 'de' 
+                      | 'desde' | 'em' | 'entre' | 'para' | 'perante' | 'por' 
+                      | 'sem' | 'sob' | 'sobre' | 'trás') 
+                    ;
 
-fragment DIGITO: [0-9];
+fragment conjuncoes :
+                    ;
 
-PERCENT: ('100' | (DIGITO? DIGITO('.'DIGITO+)?))' '?'%';
+fragment NOVALUE : ('de' | 'do' | 'as' | 'se' | 'nos' | 'para' | 'a' );
 
-Separador: ('\r'? '\n' | ' ' | '\t')+  -> skip; 
+Separador: ('\r'? '\n' | ' ' | '\t' | NOVALUE)+  -> skip; 

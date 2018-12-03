@@ -1,5 +1,12 @@
 //Area de conhecimento: FAQ UMinho
 
+//TODOs
+//->(pagar|pagam|pago) não na BdC mas na parte da gramática
+//-> dar skip aos pronomes
+// keywords+
+//decidir palavras+ vs texto
+
+
 grammar QASystem;
 
 @header{

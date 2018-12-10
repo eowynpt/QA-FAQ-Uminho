@@ -11,7 +11,7 @@ qas: 'BC:' bcQAS 'QUESTOES:' questoes
 questoes: questao+
         ;
 
-questao: (PALAVRA | tipo | acao | keyword )+ SIMBOLOTERMINAL
+questao: (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL
        ;
 
 bcQAS: triplo+
@@ -47,7 +47,7 @@ fragment DIGITO: [0-9];
 
 fragment SIMBOLO : [-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
 
-SIMBOLOTERMINAL: [?.!];
+PONTOTERMINAL: [?.!];
 
 PALAVRA: (LETRA | DIGITO | SIMBOLO)+;
 

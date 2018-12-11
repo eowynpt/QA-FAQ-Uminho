@@ -1,41 +1,81 @@
-//Area de conhecimento: FAQ UMinho
+grammar QASystemGA;
 
-//TODOs
-//->(pagar|pagam|pago) não na BdC mas na parte da gramática
+/*
+    - nas questoes fazer uppercase dos tipos
+*/
 
-grammar QASystemGIC;
+@header{
+        import java.util.*;
+}
 
-qas: 'BC:' bcQAS 'QUESTOES:' questoes
+@members{
+         class Triplo{
+                      String tipo;
+                      ArrayList<String> acoes;
+                      ArrayList<String> keywords;
+                      String resposta;
+         }
+}
+
+qas: 'BC:' bcQAS 'QUESTOES:' questoes [$bcQAS.bc]
    ;
 
-questoes: questao+
+questoes [HashMap<String, Triplo> bc]: (questao [$questoes.bc])+
         ;
 
-questao: (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL
+questao [HashMap<String, Triplo> bc]
+               : (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL
+                {
+                  //TODO: Responder a cada questão
+                }
        ;
 
-bcQAS: triplo+
-     ;
+bcQAS returns [HashMap<String, Triplo> bc]
+@init{$bcQAS.bc = new HashMap<String,Triplo>();}
+           : t1=triplo [$bcQAS.bc] (t2=triplo [$t1.bcOut] {$t1.bcOut = $t2.bcOut;})*
+           ;
 
-triplo: '(' intencao ';' resposta')'  
+triplo [HashMap<String, Triplo> bcIn] returns [HashMap<String, Triplo> bcOut]
+             : '(' intencao ';' resposta')' 
+             {
+                $intencao.t.resposta = $resposta.val;
+                $bcIn.put($intencao.t.tipo,$intencao.t);
+                $bcOut = $bcIn;
+             }
       ;
 
-intencao: tipo ',' acao ',' keywords
+intencao returns [Triplo t]
+                 : tipo ',' acao ',' keywords
+                 {
+                    $intencao.t = new Triplo();
+                    $intencao.t.tipo = $tipo.val;
+                    $intencao.t.acoes = $acao.list;
+                    $intencao.t.keywords = $keywords.list;
+                 }
         ;
 
-resposta: TEXTO
+resposta returns [String val]
+                 : TEXTO {$resposta.val = $TEXTO.text;}
         ;
 
-tipo: 'Porquê' | 'O quê' | 'Quando' | 'Onde' | 'Como'
+tipo returns [String val]
+         : ( t='Porquê' | t='O quê' | t='Quando' | t='Onde' | t='Como') {$tipo.val = $t.text;}
     ;
 
-acao: 'aceder' | 'imprimir' | 'inscrever' | 'pagar' //....
-    ;
+acao returns [ArrayList<String> list]
+@init{$acao.list = new ArrayList<String>();}
+         : 'aceder' {$acao.list.add("aceder"); $acao.list.add("acedo");} 
+         | 'imprimir' {$acao.list.add("imprimir"); $acao.list.add("imprimo");} 
+         | 'inscrever' {$acao.list.add("inscrever"); $acao.list.add("inscrevo");} 
+         | 'pagar' {$acao.list.add("pagar"); $acao.list.add("pago");} 
+         ;
 
-keywords: '[' keyword ( ',' keyword)* ']'
-        ;
+keywords returns [ArrayList<String> list]
+@init{$keywords.list = new ArrayList<String>();}
+                  : '[' k1=keyword {$keywords.list.add($k1.val);} ( ',' k2=keyword {$keywords.list.add($k2.val);})* ']' 
+                  ;
 
-keyword: 'propinas' | 'época' | 'especial' | 'portal' | 'académico' | 'Universidade' | 'Minho' //....
+keyword returns [String val]: ( t='propinas' | t='época' | t='especial' | t='portal' | t='académico' | t='Universidade' | t='Minho') {$keyword.val=$t.text;}
        ;
 
 /* Definição do Analisador Léxico */         

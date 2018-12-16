@@ -1,7 +1,7 @@
 BC:
-( Quando , pagar , [ propinas ] ; ' ate dia 23 de julho ' )
-( Onde , inscrever , [ época , especial ] ; ' no portal académico ' )
+( Quando , pagar , [ propinas ] ; ' Até dia 23 de julho .' )
+( Onde , inscrever , [ época , especial ] ; ' No portal académico. ' )
 
 QUESTOES:
 Quando se pagam as propinas ?
-Onde nos devemos increver para a época especial ?
+Onde nos devemos inscrever para a época especial ?

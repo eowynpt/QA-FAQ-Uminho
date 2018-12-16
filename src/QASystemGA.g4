@@ -6,6 +6,7 @@ grammar QASystemGA;
 
 @header{
         import java.util.*;
+        import java.util.stream.Collectors;
 }
 
 @members{
@@ -15,31 +16,83 @@ grammar QASystemGA;
                       ArrayList<String> keywords;
                       String resposta;
          }
+         
+         boolean containsElemList(ArrayList<String> l1, ArrayList<String> l2){
+            boolean ret=false;
+            int size = l1.size();
+            
+            for(int i=0; i<size && !ret; i++)
+                ret=l2.contains(l1.get(i));
+            
+            return ret;
+         }
 }
 
 qas: 'BC:' bcQAS 'QUESTOES:' questoes [$bcQAS.bc]
    ;
 
-questoes [HashMap<String, Triplo> bc]: (questao [$questoes.bc])+
+questoes [HashMap<String, ArrayList<Triplo>> bc]: (questao [$questoes.bc])+
         ;
 
-questao [HashMap<String, Triplo> bc]
-               : (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL
+questao [HashMap<String, ArrayList<Triplo>> bc]
+@init{
+    ArrayList<String> tipos = new ArrayList<String>();
+    ArrayList<String> acoes = new ArrayList<String>();
+    ArrayList<String> keywords = new ArrayList<String>();
+    ArrayList<String> palavras = new ArrayList<String>();
+    String question = "";
+}
+               : (PALAVRA {palavras.add($PALAVRA.text); question+=$PALAVRA.text + " ";} | tipo {tipos.add($tipo.val); question+=$tipo.val + " ";} | acao {acoes.add($acao.val); question+=$acao.val + " ";} | keyword {keywords.add($keyword.val); question+=$keyword.val + " ";} )+ PONTOTERMINAL
                 {
-                  //TODO: Responder a cada questão
+                  question+= $PONTOTERMINAL.text;
+                  int tipoSize = tipos.size();
+                  if(tipoSize>0){
+                        ArrayList<Triplo> aux = new ArrayList<Triplo>();
+                        for(int i=0;i<tipoSize;i++)
+                            aux.addAll($bc.get(tipos.get(i)));
+
+                        ArrayList<String> resp = aux.stream()
+                                                                                  .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
+                                                                                  .filter(a -> containsElemList(a.keywords,keywords))
+                                                                                  .map(a -> a.resposta.toString())
+                                                                                  .collect(Collectors.toCollection(ArrayList::new));
+                         
+                        System.out.println(question);
+                        int w=0;
+                        for(String r : resp)
+                            System.out.println("R" + w++ + ":" + r);
+                  }else{
+                        ArrayList<Triplo> aux = new ArrayList<Triplo>();
+                        for(ArrayList<Triplo> l : $bc.values())
+                            aux.addAll(l);
+
+                        ArrayList<String> resp = aux.stream()
+                                                                                  .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
+                                                                                  .filter(a -> containsElemList(a.keywords,keywords))
+                                                                                  .map(a -> a.resposta)
+                                                                                  .collect(Collectors.toCollection(ArrayList::new));
+                        
+                        System.out.println(question);
+                        int w=0;
+                        for(String r : resp)
+                            System.out.println("R" + w++ + ":" + r);
+                  }
                 }
        ;
 
-bcQAS returns [HashMap<String, Triplo> bc]
-@init{$bcQAS.bc = new HashMap<String,Triplo>();}
+bcQAS returns [HashMap<String, ArrayList<Triplo>> bc]
+@init{$bcQAS.bc = new HashMap<String,ArrayList<Triplo>>();}
            : t1=triplo [$bcQAS.bc] (t2=triplo [$t1.bcOut] {$t1.bcOut = $t2.bcOut;})*
            ;
 
-triplo [HashMap<String, Triplo> bcIn] returns [HashMap<String, Triplo> bcOut]
+triplo [HashMap<String, ArrayList<Triplo>> bcIn] returns [HashMap<String, ArrayList<Triplo>> bcOut]
              : '(' intencao ';' resposta')' 
              {
                 $intencao.t.resposta = $resposta.val;
-                $bcIn.put($intencao.t.tipo,$intencao.t);
+                ArrayList<Triplo> aux = $bcIn.get($intencao.t.tipo);
+                if(aux==null) aux = new ArrayList<Triplo>();
+                aux.add($intencao.t);
+                $bcIn.put($intencao.t.tipo,aux);
                 $bcOut = $bcIn;
              }
       ;
@@ -62,12 +115,12 @@ tipo returns [String val]
          : ( t='Porquê' | t='O quê' | t='Quando' | t='Onde' | t='Como') {$tipo.val = $t.text;}
     ;
 
-acao returns [ArrayList<String> list]
+acao returns [ArrayList<String> list, String val]
 @init{$acao.list = new ArrayList<String>();}
-         : 'aceder' {$acao.list.add("aceder"); $acao.list.add("acedo");} 
-         | 'imprimir' {$acao.list.add("imprimir"); $acao.list.add("imprimo");} 
-         | 'inscrever' {$acao.list.add("inscrever"); $acao.list.add("inscrevo");} 
-         | 'pagar' {$acao.list.add("pagar"); $acao.list.add("pago");} 
+         : 'aceder' {$acao.list.add("aceder"); $acao.list.add("acedo"); $acao.val="aceder";} 
+         | 'imprimir' {$acao.list.add("imprimir"); $acao.list.add("imprimo"); $acao.val="imprimir";} 
+         | 'inscrever' {$acao.list.add("inscrever"); $acao.list.add("inscrevo"); $acao.val="inscrever";} 
+         | 'pagar' {$acao.list.add("pagar"); $acao.list.add("pago"); $acao.list.add("pagam"); $acao.val="pagar";} 
          ;
 
 keywords returns [ArrayList<String> list]
@@ -90,7 +143,7 @@ fragment SIMBOLO : [-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
 PONTOTERMINAL: [?.!];
 
 PALAVRA: (LETRA | DIGITO | SIMBOLO)+;
-
+/*
 fragment PRONOMES: ( ' eu ' | ' me ' | ' mim ' | ' tu ' | ' te ' | ' ti ' | ' ele ' | ' ela '
                                         | ' se ' | ' lhe ' | ' nós ' | ' nos ' | ' vos ' | ' vós ' | ' lhes '
                                         | ' eles ' | ' elas ' )
@@ -130,5 +183,5 @@ fragment ARTIGOS: ( ' o ' | ' os ' | ' um ' | ' uns ' | ' a ' | ' as ' | ' uma '
                                   ;
 
 fragment NOVALUE : ( ' não ' | PRONOMES | PROPOSICOES | CONJUNCOES | DETERMINANTES | ARTIGOS );
-
-Separador: ( NOVALUE | '\r'? '\n' | ' ' | '\t' )+  -> skip; 
+*/
+Separador: ( '\r'? '\n' | ' ' | '\t' )+  -> skip; 

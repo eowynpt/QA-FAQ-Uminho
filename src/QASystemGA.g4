@@ -19,10 +19,12 @@ grammar QASystemGA;
          
          boolean containsElemList(ArrayList<String> l1, ArrayList<String> l2){
             boolean ret=false;
-            int size = l1.size();
+            int size1 = l1.size();
+            int size2 = l2.size();
             
-            for(int i=0; i<size && !ret; i++)
-                ret=l2.contains(l1.get(i));
+            for(int i=0; i<size1 && !ret; i++)
+                for(int j=0; j<size2 && !ret; j++)
+                    ret=l2.get(j).toLowerCase().equals(l1.get(i).toLowerCase());
             
             return ret;
          }
@@ -40,43 +42,33 @@ questao [HashMap<String, ArrayList<Triplo>> bc]
     ArrayList<String> acoes = new ArrayList<String>();
     ArrayList<String> keywords = new ArrayList<String>();
     ArrayList<String> palavras = new ArrayList<String>();
-    String question = "";
+    StringBuffer question = new StringBuffer();
 }
-               : (PALAVRA {palavras.add($PALAVRA.text); question+=$PALAVRA.text + " ";} | tipo {tipos.add($tipo.val); question+=$tipo.val + " ";} | acao {acoes.add($acao.val); question+=$acao.val + " ";} | keyword {keywords.add($keyword.val); question+=$keyword.val + " ";} )+ PONTOTERMINAL
+               : (PALAVRA {palavras.add($PALAVRA.text); question.append($PALAVRA.text).append(" ");} | tipo {tipos.add($tipo.val); question.append($tipo.val).append(" ");} | acao {acoes.add($acao.val); question.append($acao.val).append(" ");} | keyword {keywords.add($keyword.val); question.append($keyword.val).append(" ");} )+ PONTOTERMINAL
                 {
-                  question+= $PONTOTERMINAL.text;
+                  question.append($PONTOTERMINAL.text);
                   int tipoSize = tipos.size();
+                  ArrayList<String> resp;
+                  ArrayList<Triplo> aux = new ArrayList<Triplo>();
+                  
                   if(tipoSize>0){
-                        ArrayList<Triplo> aux = new ArrayList<Triplo>();
                         for(int i=0;i<tipoSize;i++)
                             aux.addAll($bc.get(tipos.get(i)));
-
-                        ArrayList<String> resp = aux.stream()
-                                                                                  .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
-                                                                                  .filter(a -> containsElemList(a.keywords,keywords))
-                                                                                  .map(a -> a.resposta.toString())
-                                                                                  .collect(Collectors.toCollection(ArrayList::new));
-                         
-                        System.out.println(question);
-                        int w=0;
-                        for(String r : resp)
-                            System.out.println("R" + w++ + ":" + r);
                   }else{
-                        ArrayList<Triplo> aux = new ArrayList<Triplo>();
                         for(ArrayList<Triplo> l : $bc.values())
                             aux.addAll(l);
-
-                        ArrayList<String> resp = aux.stream()
-                                                                                  .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
-                                                                                  .filter(a -> containsElemList(a.keywords,keywords))
-                                                                                  .map(a -> a.resposta)
-                                                                                  .collect(Collectors.toCollection(ArrayList::new));
-                        
-                        System.out.println(question);
-                        int w=0;
-                        for(String r : resp)
-                            System.out.println("R" + w++ + ":" + r);
                   }
+
+                   resp = aux.stream()
+                                       .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
+                                       .filter(a -> containsElemList(a.keywords,keywords) || containsElemList(a.keywords,palavras))
+                                       .map(a -> a.resposta)
+                                       .collect(Collectors.toCollection(ArrayList::new));
+            
+                   System.out.println(question.toString());
+                   int w=0;
+                   for(String r : resp)
+                        System.out.println("R" + w++ + ":" + r);
                 }
        ;
 

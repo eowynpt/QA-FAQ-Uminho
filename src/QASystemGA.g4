@@ -63,6 +63,7 @@ questao [HashMap<String, ArrayList<Triplo>> bc]
                                        .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
                                        .filter(a -> containsElemList(a.keywords,keywords) || containsElemList(a.keywords,palavras))
                                        .map(a -> a.resposta)
+                                       .distinct()
                                        .collect(Collectors.toCollection(ArrayList::new));
             
                    System.out.println(question.toString());

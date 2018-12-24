@@ -1,7 +1,17 @@
 BC:
 ( Quando , pagar , [ propinas ] ; ' Até dia 23 de julho .' )
-( Onde , inscrever , [ época , especial ] ; ' No portal académico. ' )
+( Qual , ser , [ email , diretor ,  curso ] ; ' ddd@ddd.com. ' )
+( Como , aceder , [ calendário , escolar ] ; ' O calendário escolar está disponível no portal académico. ' )
+( Como , imprimir , [ calendário , escolar ] ; ' O calendário escolar pode ser imprimido através do portal académico. ' )
+( Onde , inscrever , [ exame , época , especial ] ; ' Incrições para exame de Época Especial são feitas no portal académico ' )
+( Onde , inscrever , [ exame , época , recurso ] ; ' Não é necessária incrição para realizar exame de recurso. ' )
 
 QUESTOES:
 Quando se pagam as propinas ?
-Onde nos devemos inscrever para a época especial ?
+Como posso pagar as propinas?
+Qual é o nome do reitor?
+Onde nos devemos inscrever para o exame de Época Especial?
+Onde nos devemos inscrever para o exame de Época de Recurso?
+Onde nos devemos inscrever para o exame de recurso?
+Onde nos devemos inscrever para o exame?
+Como aceder para imprimir o calendário escolar?

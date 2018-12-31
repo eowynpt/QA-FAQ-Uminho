@@ -1,6 +1,5 @@
 grammar QASystemGA;
 
-
 @header{
         import java.util.*;
         import java.util.stream.Collectors;
@@ -53,8 +52,7 @@ grammar QASystemGA;
                         nkeys--; 
                     }
             if(nkeys==0) return true;
-            else return false;
-            
+            else return false;           
          }
 
          /* cria lista com as keywords presentes na BC*/
@@ -67,46 +65,26 @@ grammar QASystemGA;
             
             return l;
          }
-
-}
-
-qas: 'BC:' bcQAS 'QUESTOES:' questoes [$bcQAS.bc]
-   ;
-
-questoes [HashMap<String, ArrayList<Triplo>> bc]: (questao [$questoes.bc])+
-        ;
-
-questao [HashMap<String, ArrayList<Triplo>> bc]
-@init{
-    ArrayList<String> tipos = new ArrayList<String>();
-    ArrayList<String> acoes = new ArrayList<String>();
-    ArrayList<String> keywords = new ArrayList<String>();
-    ArrayList<String> palavras = new ArrayList<String>();
-    StringBuffer question = new StringBuffer();
-    ArrayList<String> keywordsBC = new ArrayList<String>();
-    ArrayList<String> keywordsPalavras = new ArrayList<String>();
-}
-               : (PALAVRA {palavras.add($PALAVRA.text); question.append($PALAVRA.text).append(" ");} 
-                 | tipo {tipos.add($tipo.val); question.append($tipo.val).append(" ");} 
-                 | acao {acoes.add($acao.val); question.append($acao.val).append(" ");} 
-                 | keyword {keywords.add($keyword.val); question.append($keyword.val).append(" ");} )+ 
-                   PONTOTERMINAL
-                {
-                  question.append($PONTOTERMINAL.text);
+         
+         /* Obtém a(s) resposta(s) para cada questão */
+         void getAnswer(HashMap<String, ArrayList<Triplo>> bc, String pontoTerminal, StringBuffer question,ArrayList<String> tipos, ArrayList<String> acoes, ArrayList<String> keywords, ArrayList<String> palavras){
+                  question.append(pontoTerminal);
                   int tipoSize = tipos.size();
+                  ArrayList<String> keywordsBC = new ArrayList<String>();
+                  ArrayList<String> keywordsPalavras = new ArrayList<String>();
                   ArrayList<String> resp;
                   ArrayList<String> respteste;
                   ArrayList<Triplo> aux = new ArrayList<Triplo>();
 
                   
-                  for(ArrayList<Triplo> l : $bc.values())
+                  for(ArrayList<Triplo> l : bc.values())
                         keywordsBC = addkeywords(keywordsBC,l);
 
                   if(tipoSize>0){
                         for(int i=0;i<tipoSize;i++)
-                            aux.addAll($bc.get(tipos.get(i)));
+                            aux.addAll(bc.get(tipos.get(i)));
                   }else{
-                        for(ArrayList<Triplo> l : $bc.values())
+                        for(ArrayList<Triplo> l : bc.values())
                             aux.addAll(l);                        
                   }
                   
@@ -152,7 +130,29 @@ questao [HashMap<String, ArrayList<Triplo>> bc]
 
                    if (resp.isEmpty()) System.out.println("Não foi encontrada resposta à sua pergunta.");
                  }
-                }
+         }
+}
+
+qas: 'BC:' bcQAS 'QUESTOES:' questoes [$bcQAS.bc]
+   ;
+
+questoes [HashMap<String, ArrayList<Triplo>> bc]: (questao [$questoes.bc])+
+        ;
+
+questao [HashMap<String, ArrayList<Triplo>> bc]
+@init{
+    ArrayList<String> tipos = new ArrayList<String>();
+    ArrayList<String> acoes = new ArrayList<String>();
+    ArrayList<String> keywords = new ArrayList<String>();
+    ArrayList<String> palavras = new ArrayList<String>();
+    StringBuffer question = new StringBuffer();
+}
+               : (PALAVRA {palavras.add($PALAVRA.text); question.append($PALAVRA.text).append(" ");} 
+                 | tipo {tipos.add($tipo.val); question.append($tipo.val).append(" ");} 
+                 | acao {acoes.add($acao.val); question.append($acao.val).append(" ");} 
+                 | keyword {keywords.add($keyword.val); question.append($keyword.val).append(" ");} )+ 
+                 PONTOTERMINAL
+                {getAnswer($bc,$PONTOTERMINAL.text,question,tipos,acoes,keywords,palavras);}
        ;
 
 bcQAS returns [HashMap<String, ArrayList<Triplo>> bc]
@@ -197,6 +197,9 @@ acao returns [ArrayList<String> list, String val]
          | 'ser' {$acao.list.add("é"); $acao.list.add("foi");} 
          | 'inscrever' {$acao.list.add("inscrever"); $acao.list.add("inscrevo"); $acao.val="inscrever";} 
          | 'pagar' {$acao.list.add("pagar"); $acao.list.add("pago"); $acao.list.add("pagam"); $acao.val="pagar";} 
+         | 'tem' {$acao.list.add("tem"); $acao.list.add("teve"); $acao.list.add("tinha");}
+         | 'haver' {$acao.list.add("há"); $acao.list.add("havia"); $acao.list.add("houve");}
+         | 'funcionar' {$acao.list.add("funcionar"); $acao.list.add("funciona"); $acao.list.add("funcionará");}
          ;
 
 keywords returns [ArrayList<String> list]
@@ -206,7 +209,9 @@ keywords returns [ArrayList<String> list]
 
 keyword returns [String val]: ( t='propinas' | t='época' | t='especial' | t='email' | t='diretor' | t='curso' |
                                 t='portal' | t='académico' | t='Universidade' | t='Minho' |
-                                t='exame' | t='recurso' | t='calendário' | t='escolar' | t='reitor'
+                                t='exame' | t='recurso' | t='calendário' | t='escolar' | t='reitor' | t='horário' | 
+                                t='regulamento' | t='código' | t='ético' | t='conduta' | t='direitos' | t='deveres' |  
+                                t='cadeira' | t='unidade' | t='curricular' | t='ETC' | t='ETCs' | t='Erasmus'
                               ) {$keyword.val=$t.text;}
        ;
 
@@ -222,45 +227,5 @@ fragment SIMBOLO : [-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
 PONTOTERMINAL: [?.!];
 
 PALAVRA: (LETRA | DIGITO | SIMBOLO)+;
-/*
-fragment PRONOMES: ( ' eu ' | ' me ' | ' mim ' | ' tu ' | ' te ' | ' ti ' | ' ele ' | ' ela '
-                                        | ' se ' | ' lhe ' | ' nós ' | ' nos ' | ' vos ' | ' vós ' | ' lhes '
-                                        | ' eles ' | ' elas ' )
-                                    ;
-                     
-fragment PROPOSICOES: ( ' ante ' | ' após ' | ' até ' | ' com ' | ' contra '
-                                              | ' desde ' | ' em ' | ' entre ' | ' para ' | ' perante ' | ' por ' 
-                                              | ' sem ' | ' sob ' | ' sobre ' | ' trás ' ) 
-                                          ;
 
-fragment CONJUNCOES : ( ' e ' | ' mas ' | ' ainda ' | ' também ' | ' nem ' | ' contudo '
-                                             | ' entretanto ' | ' obstante ' | ' entanto ' | ' porém ' | ' todavia '
-                                             | ' já ' | ' ou ' | ' ora ' | ' quer ' | ' assim ' | ' então ' | ' logo '
-                                             | ' pois ' | ' conseguinte ' | ' portanto ' | ' porquanto '
-                                             | ' porque ' | ' que ' )
-                                          ;
-
-fragment DETERMINANTES: ( ' meu ' | ' teu ' | ' seu ' | ' minha ' | ' tua ' | ' sua ' | ' meus '
-                                                   | ' teus' | ' seus ' | ' minhas ' | ' tuas ' | ' suas ' | ' nosso '
-                                                   | ' vosso ' | ' nossa ' | ' vossa ' | ' nossos ' | ' vossos '
-                                                   | ' nossas ' | ' vossas ' | ' este ' | ' esse ' | ' aquele ' | ' esta '
-                                                   | ' essa ' | ' aquela ' | ' estes ' | ' esses ' | ' aqueles ' | ' estas '
-                                                   | ' essas ' | ' aquelas ' | ' isto ' | ' isso ' | ' aquilo ' | ' todo '
-                                                   | ' algum ' | ' nenhum ' | ' outro ' | ' muito ' | ' pouco ' | ' tanto '
-                                                   | ' qualquer ' | ' toda ' | ' alguma ' | ' nenhuma ' | ' outra ' | ' muita '
-                                                   | ' pouca ' | ' tanta ' | ' todos ' | ' alguns ' | ' nenhuns ' | ' outros '
-                                                   | ' muitos ' | ' poucos ' | ' tantos ' | ' quaisquer ' | ' todas '
-                                                   | ' algumas ' | ' nenhumas ' | ' outras ' | ' muitas ' | ' poucas ' | ' tantas '
-                                                   | ' tudo ' | ' nada ' | ' cada ' | ' ninguém ' | ' alguém ' )
-                                                ;
-
-fragment ARTIGOS: ( ' o ' | ' os ' | ' um ' | ' uns ' | ' a ' | ' as ' | ' uma ' | ' umas '
-                                     | ' ao ' | ' à ' | ' aos ' | ' às ' | ' em ' | ' num ' | ' numa ' | ' nuns '
-                                     | ' numas ' | ' de ' | ' do ' | ' da ' | ' dos ' | ' das ' | ' em '
-                                     | ' no ' | ' na ' | ' nos ' | ' nas ' | ' dum ' | ' duma ' | ' duns ' | ' dumas '
-                                     | ' pelo ' | ' pela ' | ' pelos ' | ' pelas ' )
-                                  ;
-
-fragment NOVALUE : ( ' não ' | PRONOMES | PROPOSICOES | CONJUNCOES | DETERMINANTES | ARTIGOS );
-*/
 Separador: ( '\r'? '\n' | ' ' | '\t' )+  -> skip; 

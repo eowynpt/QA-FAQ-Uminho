@@ -67,8 +67,7 @@ grammar QASystemGA;
          }
          
          /* Obtém a(s) resposta(s) para cada questão */
-         void getAnswer(HashMap<String, ArrayList<Triplo>> bc, String pontoTerminal, StringBuffer question,ArrayList<String> tipos, ArrayList<String> acoes, ArrayList<String> keywords, ArrayList<String> palavras){
-                  question.append(pontoTerminal);
+         void getAnswer(HashMap<String, ArrayList<Triplo>> bc, StringBuffer question,ArrayList<String> tipos, ArrayList<String> acoes, ArrayList<String> keywords, ArrayList<String> palavras){
                   int tipoSize = tipos.size();
                   ArrayList<String> keywordsBC = new ArrayList<String>();
                   ArrayList<String> keywordsPalavras = new ArrayList<String>();
@@ -151,8 +150,8 @@ questao [HashMap<String, ArrayList<Triplo>> bc]
                  | tipo {tipos.add($tipo.val); question.append($tipo.val).append(" ");} 
                  | acao {acoes.add($acao.val); question.append($acao.val).append(" ");} 
                  | keyword {keywords.add($keyword.val); question.append($keyword.val).append(" ");} )+ 
-                 PONTOTERMINAL
-                {getAnswer($bc,$PONTOTERMINAL.text,question,tipos,acoes,keywords,palavras);}
+                 (PONTOTERMINAL {question.append($PONTOTERMINAL.text);} )+
+                {getAnswer($bc,question,tipos,acoes,keywords,palavras);}
        ;
 
 bcQAS returns [HashMap<String, ArrayList<Triplo>> bc]
@@ -187,14 +186,14 @@ resposta returns [String val]
         ;
 
 tipo returns [String val]
-         : ( t='Porquê' | t='O quê' | t='Quando' | t='Onde' | t='Como' | t='Qual') {$tipo.val = $t.text;}
+         : ( t='Porquê' | t='O que' | t='Quando' | t='Onde' | t='Como' | t='Qual' | t='Quem') {$tipo.val = $t.text;}
     ;
 
 acao returns [ArrayList<String> list, String val]
 @init{$acao.list = new ArrayList<String>();}
          : 'aceder' {$acao.list.add("aceder"); $acao.list.add("acedo"); $acao.val="aceder";} 
          | 'imprimir' {$acao.list.add("imprimir"); $acao.list.add("imprimo"); $acao.val="imprimir";} 
-         | 'ser' {$acao.list.add("é"); $acao.list.add("foi");} 
+         | 'ser' {$acao.list.add("é"); $acao.list.add("foi"); $acao.list.add("são");} 
          | 'inscrever' {$acao.list.add("inscrever"); $acao.list.add("inscrevo"); $acao.val="inscrever";} 
          | 'pagar' {$acao.list.add("pagar"); $acao.list.add("pago"); $acao.list.add("pagam"); $acao.val="pagar";} 
          | 'tem' {$acao.list.add("tem"); $acao.list.add("teve"); $acao.list.add("tinha");}
@@ -211,7 +210,7 @@ keyword returns [String val]: ( t='propinas' | t='época' | t='especial' | t='em
                                 t='portal' | t='académico' | t='Universidade' | t='Minho' |
                                 t='exame' | t='recurso' | t='calendário' | t='escolar' | t='reitor' | t='horário' | 
                                 t='regulamento' | t='código' | t='ético' | t='conduta' | t='direitos' | t='deveres' |  
-                                t='cadeira' | t='unidade' | t='curricular' | t='ETC' | t='ETCs' | t='Erasmus'
+                                t='cadeira' | t='unidade' | t='curricular' | t='ECT' | t='ECTS' | t='Erasmus'
                               ) {$keyword.val=$t.text;}
        ;
 
@@ -222,7 +221,7 @@ fragment LETRA : [a-zA-ZáéíóúÁÉÍÓÚÃãÕõâêôÂÊÔÀÈÌÒÙàèì
 
 fragment DIGITO: [0-9];
 
-fragment SIMBOLO : [-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
+fragment SIMBOLO : [-%$€@&()\[\]:{}=><+*;,ºª~^/\'"];
 
 PONTOTERMINAL: [?.!];
 

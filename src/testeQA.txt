@@ -1,5 +1,6 @@
 BC:
 ( Quando , pagar , [ propinas ] ; ' Até dia 23 de julho .' )
+( O que , ser , [ ECTS ] ; ' European Credit Transfer System .' )
 ( Qual , ser , [ email , diretor ,  curso ] ; ' ddd@ddd.com. ' )
 ( Como , aceder , [ calendário , escolar ] ; ' O calendário escolar está disponível no portal académico. ' )
 ( Como , imprimir , [ calendário , escolar ] ; ' O calendário escolar pode ser imprimido através do portal académico. ' )
@@ -7,8 +8,8 @@ BC:
 ( Onde , inscrever , [ exame , época , recurso ] ; ' Não é necessária incrição para realizar exame de recurso. ' )
 
 QUESTOES:
-Quando se pagam as propinas ?
-Como posso pagar as propinas?
+Gostava de saber quando se pagam as propinas de 2018/19 ...
+Siri, diz-me: O QUE SÃO ECTS ?!
 Qual é o nome do reitor?
 ola, onde nos devemos inscrever para o exame de Época Especial?
 Onde nos devemos inscrever para o exame de Época de Recurso?

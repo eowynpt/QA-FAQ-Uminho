@@ -6,7 +6,7 @@ qas: 'BC:' bcQAS 'QUESTOES:' questoes
 questoes: questao+
         ;
 
-questao: (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL
+questao: (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL+
        ;
 
 bcQAS: triplo+
@@ -40,7 +40,7 @@ fragment LETRA : [a-zA-ZáéíóúÁÉÍÓÚÃãÕõâêôÂÊÔÀÈÌÒÙàèì
 
 fragment DIGITO: [0-9];
 
-fragment SIMBOLO : [-%$€@&()\[\]{}=><+*;,ºª~^/\'"];
+fragment SIMBOLO : [-%$€@&()\[\]:{}=><+*;,ºª~^/\'"];
 
 PONTOTERMINAL: [?.!];
 

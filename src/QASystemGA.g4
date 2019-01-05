@@ -6,7 +6,7 @@ grammar QASystemGA;
 }
 
 @members{
-    class Triplo{
+    class Par{
         String tipo;
         ArrayList<String> acoes;
         ArrayList<String> keywords;
@@ -56,34 +56,34 @@ grammar QASystemGA;
     }
 
     /* cria lista com as keywords presentes na BC*/
-    ArrayList<String> addkeywords (ArrayList<String> l, ArrayList<Triplo> t) {
+    ArrayList<String> addkeywords (ArrayList<String> l, ArrayList<Par> t) {
         ArrayList<String> k = new ArrayList<String>();
         
-        for (Triplo triple : t)
-            for (String s : triple.keywords)
+        for (Par pair : t)
+            for (String s : pair.keywords)
                 if(!l.contains(s)) l.add(s);
         
         return l;
     }
      
     /* Obtém a(s) resposta(s) para cada questão */
-    void getAnswer(HashMap<String, ArrayList<Triplo>> bc, StringBuffer question,ArrayList<String> tipos, ArrayList<String> acoes, ArrayList<String> keywords, ArrayList<String> palavras){
+    void getAnswer(HashMap<String, ArrayList<Par>> bc, StringBuffer question,ArrayList<String> tipos, ArrayList<String> acoes, ArrayList<String> keywords, ArrayList<String> palavras){
         int tipoSize = tipos.size();
         ArrayList<String> keywordsBC = new ArrayList<String>();
         ArrayList<String> keywordsPalavras = new ArrayList<String>();
         ArrayList<String> resp;
         ArrayList<String> respteste;
-        ArrayList<Triplo> aux = new ArrayList<Triplo>();
+        ArrayList<Par> aux = new ArrayList<Par>();
 
           
-        for(ArrayList<Triplo> l : bc.values())
+        for(ArrayList<Par> l : bc.values())
             keywordsBC = addkeywords(keywordsBC,l);
 
         if(tipoSize>0){
             for(int i=0;i<tipoSize;i++)
                 aux.addAll(bc.get(tipos.get(i)));
         }else{
-            for(ArrayList<Triplo> l : bc.values())
+            for(ArrayList<Par> l : bc.values())
                 aux.addAll(l);                        
         }  
 
@@ -135,10 +135,10 @@ grammar QASystemGA;
 qas: 'BC:' bcQAS 'QUESTOES:' questoes [$bcQAS.bc]
    ;
 
-questoes [HashMap<String, ArrayList<Triplo>> bc]: (questao [$questoes.bc])+
+questoes [HashMap<String, ArrayList<Par>> bc]: (questao [$questoes.bc])+
                                                 ;
 
-questao [HashMap<String, ArrayList<Triplo>> bc]
+questao [HashMap<String, ArrayList<Par>> bc]
 @init{
     ArrayList<String> tipos = new ArrayList<String>();
     ArrayList<String> acoes = new ArrayList<String>();
@@ -154,27 +154,27 @@ questao [HashMap<String, ArrayList<Triplo>> bc]
     {getAnswer($bc,question,tipos,acoes,keywords,palavras);}
     ;
 
-bcQAS returns [HashMap<String, ArrayList<Triplo>> bc]
-@init{$bcQAS.bc = new HashMap<String,ArrayList<Triplo>>();}
-    : t1=triplo [$bcQAS.bc] (t2=triplo [$t1.bcOut] {$t1.bcOut = $t2.bcOut;})*
+bcQAS returns [HashMap<String, ArrayList<Par>> bc]
+@init{$bcQAS.bc = new HashMap<String,ArrayList<Par>>();}
+    : t1=par [$bcQAS.bc] (t2=par [$t1.bcOut] {$t1.bcOut = $t2.bcOut;})*
     ;
 
-triplo [HashMap<String, ArrayList<Triplo>> bcIn] returns [HashMap<String, ArrayList<Triplo>> bcOut]
+par [HashMap<String, ArrayList<Par>> bcIn] returns [HashMap<String, ArrayList<Par>> bcOut]
     : '(' intencao ';' resposta')' 
     {
         $intencao.t.resposta = $resposta.val;
-        ArrayList<Triplo> aux = $bcIn.get($intencao.t.tipo);
-        if(aux==null) aux = new ArrayList<Triplo>();
+        ArrayList<Par> aux = $bcIn.get($intencao.t.tipo);
+        if(aux==null) aux = new ArrayList<Par>();
         aux.add($intencao.t);
         $bcIn.put($intencao.t.tipo,aux);
         $bcOut = $bcIn;
     }
     ;
 
-intencao returns [Triplo t]
+intencao returns [Par t]
         : tipo ',' acao ',' keywords
         {
-            $intencao.t = new Triplo();
+            $intencao.t = new Par();
             $intencao.t.tipo = $tipo.val;
             $intencao.t.acoes = $acao.list;
             $intencao.t.keywords = $keywords.list;

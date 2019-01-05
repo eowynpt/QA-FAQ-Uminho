@@ -9,10 +9,10 @@ questoes: questao+
 questao: (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL+
        ;
 
-bcQAS: triplo+
+bcQAS: par+
      ;
 
-triplo: '(' intencao ';' resposta')'  
+par: '(' intencao ';' resposta')'  
       ;
 
 intencao: tipo ',' acao ',' keywords
@@ -34,7 +34,7 @@ keyword: 'propinas' | 'época' | 'especial' | 'portal' | 'académico' | 'Univers
        ;
 
 /* Definição do Analisador Léxico */         
-TEXTO:    (('\'') ~('\'')* ('\''));
+TEXTO: (('\'') ~('\'')* ('\''));
 
 fragment LETRA : [a-zA-ZáéíóúÁÉÍÓÚÃãÕõâêôÂÊÔÀÈÌÒÙàèìòùÇç] ;
 

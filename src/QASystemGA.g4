@@ -14,7 +14,7 @@ grammar QASystemGA;
                       
         public String toString(){
              StringBuffer sb = new StringBuffer();
-             sb.append("t = ");
+             sb.append("p = ");
              sb.append("("+this.tipo+",");
              sb.append(Arrays.toString(this.acoes.toArray())+",");
              sb.append(Arrays.toString(this.keywords.toArray())+")");
@@ -56,10 +56,10 @@ grammar QASystemGA;
     }
 
     /* cria lista com as keywords presentes na BC*/
-    ArrayList<String> addkeywords (ArrayList<String> l, ArrayList<Par> t) {
+    ArrayList<String> addkeywords (ArrayList<String> l, ArrayList<Par> p) {
         ArrayList<String> k = new ArrayList<String>();
         
-        for (Par pair : t)
+        for (Par pair : p)
             for (String s : pair.keywords)
                 if(!l.contains(s)) l.add(s);
         
@@ -162,22 +162,22 @@ bcQAS returns [HashMap<String, ArrayList<Par>> bc]
 par [HashMap<String, ArrayList<Par>> bcIn] returns [HashMap<String, ArrayList<Par>> bcOut]
     : '(' intencao ';' resposta')' 
     {
-        $intencao.t.resposta = $resposta.val;
-        ArrayList<Par> aux = $bcIn.get($intencao.t.tipo);
+        $intencao.p.resposta = $resposta.val;
+        ArrayList<Par> aux = $bcIn.get($intencao.p.tipo);
         if(aux==null) aux = new ArrayList<Par>();
-        aux.add($intencao.t);
-        $bcIn.put($intencao.t.tipo,aux);
+        aux.add($intencao.p);
+        $bcIn.put($intencao.p.tipo,aux);
         $bcOut = $bcIn;
     }
     ;
 
-intencao returns [Par t]
+intencao returns [Par p]
         : tipo ',' acao ',' keywords
         {
-            $intencao.t = new Par();
-            $intencao.t.tipo = $tipo.val;
-            $intencao.t.acoes = $acao.list;
-            $intencao.t.keywords = $keywords.list;
+            $intencao.p = new Par();
+            $intencao.p.tipo = $tipo.val;
+            $intencao.p.acoes = $acao.list;
+            $intencao.p.keywords = $keywords.list;
         }
         ;
 

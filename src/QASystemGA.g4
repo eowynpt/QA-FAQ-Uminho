@@ -22,19 +22,15 @@ grammar QASystemGA;
         }
     }
          
-    boolean containsElemList(ArrayList<String> l1, ArrayList<String> l2, int n){
+    boolean containsElemList(ArrayList<String> l1, ArrayList<String> l2){
         boolean ret=false;
         int size1 = l1.size();
         int size2 = l2.size();
-        int matches=0;
         
         for(int i=0; i<size1 && !ret; i++)
-            for(int j=0; j<size2 && !ret; j++) {
+            for(int j=0; j<size2 && !ret; j++)
                 ret=l2.get(j).toLowerCase().equals(l1.get(i).toLowerCase());
-                matches++;
-            }
-        if(matches>n) n = matches;
-        if (matches<n) return false;
+
         return ret;
     }
 
@@ -42,15 +38,13 @@ grammar QASystemGA;
         boolean ret=false;
         int size1 = l1.size();
         int size2 = l2.size();
-        int nkeys = l2.size();
+        int nkeys = size2;
         
-        if(size2==0) return false;
-                  
-        for(int i=0; i<size1 && nkeys>0; i++)
-            for(int j=0; j<size2 && nkeys>0; j++)
-                if (l2.get(j).toLowerCase().equals(l1.get(i).toLowerCase()) == true) {
+        for(int i=0; i<size1; i++)
+            for(int j=0; j<size2; j++)
+                if (l2.get(j).toLowerCase().equals(l1.get(i).toLowerCase()) == true)
                     nkeys--; 
-                }
+         
         if(nkeys==0) return true;
         else return false;           
     }
@@ -72,10 +66,8 @@ grammar QASystemGA;
         ArrayList<String> keywordsBC = new ArrayList<String>();
         ArrayList<String> keywordsPalavras = new ArrayList<String>();
         ArrayList<String> resp;
-        ArrayList<String> respteste;
         ArrayList<Par> aux = new ArrayList<Par>();
 
-          
         for(ArrayList<Par> l : bc.values())
             keywordsBC = addkeywords(keywordsBC,l);
 
@@ -91,43 +83,30 @@ grammar QASystemGA;
             if(keywordsBC.contains(s.toLowerCase()))
                 keywordsPalavras.add(s);
         }
-
-        if(keywordsPalavras.isEmpty())
-            for(String s : keywords)
-                keywordsPalavras.add(s);
                     
-        int x=0;
-        respteste = aux.stream()
-                       .filter(a -> containsElemList(a.acoes,acoes,x) || containsElemList(a.acoes,palavras,x))
+        resp = aux.stream()
+                       .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
                        .filter(a -> containsAllKeywords(a.keywords,keywords) && containsAllKeywords(a.keywords,keywordsPalavras))
-                       .filter(a -> containsAllKeywords(a.keywords,keywordsPalavras))
                        .map(a -> a.resposta)
                        .distinct()
                        .collect(Collectors.toCollection(ArrayList::new));
 
-        if(!respteste.isEmpty()) {
+        if(resp.isEmpty()){
 
-            System.out.println("\n"+question.toString());
-            int w=0;
-            for(String r : respteste)
-                System.out.println("R" + w++ + ":" + r);
-
-        } else {
-
-            int n=0;
             resp = aux.stream()
-                      .filter(a -> containsElemList(a.acoes,acoes,n) || containsElemList(a.acoes,palavras,n))
-                      .filter(a -> containsElemList(a.keywords,keywords,n) || containsElemList(a.keywords,palavras,n))
+                      .filter(a -> containsElemList(a.acoes,acoes) || containsElemList(a.acoes,palavras))
+                      .filter(a -> containsElemList(a.keywords,keywords) || containsElemList(a.keywords,palavras))
                       .map(a -> a.resposta)
                       .distinct()
                       .collect(Collectors.toCollection(ArrayList::new));
-    
+        }
+        
+        if (resp.isEmpty()) System.out.println("Não foi encontrada resposta à sua pergunta.");
+        else{
             System.out.println("\n"+question.toString());
             int w=0;
             for(String r : resp)
                 System.out.println("R" + w++ + ":" + r);
-
-            if (resp.isEmpty()) System.out.println("Não foi encontrada resposta à sua pergunta.");
         }
     }
 }

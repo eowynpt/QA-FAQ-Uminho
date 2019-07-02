@@ -1,0 +1,122 @@
+\qquad De forma a pôr o trabalho funcional, isto é, criar os mecanismos de resposta procedeu-se à transformação da gramática de uma GIC (gramática independente de contexto) para uma GA (gramática de atributos).
+
+A criação da base de conhecimento é feita através da produção '\textit{bcQAS}'. Os pares pergunta-resposta são lidos do ficheiro de teste e guardados num \textit{hashmap} cujas chaves são os 'tipos' das intenções (e.g. 'Como','Quando', ...) e os valores são Arraylists de pares (intencao, resposta). Um objeto do tipo \texttt{Par} contém o tipo, a ação, as keywords e informação associada, correspondendo essencialmente a um par pergunta-resposta da base de conhecimento. 
+Esta decisão foi tomada para tornar a procura mais eficiente.
+
+\begin{verbatim}
+
+bcQAS returns [HashMap<String, ArrayList<Par>> bc]
+@init{$bcQAS.bc = new HashMap<String,ArrayList<Par>>();}
+    : t1=par [$bcQAS.bc] (t2=par [$t1.bcOut] {$t1.bcOut = $t2.bcOut;})*
+    ;
+
+par [HashMap<String, ArrayList<Par>> bcIn] 
+    returns [HashMap<String, ArrayList<Par>> bcOut]
+    : '(' intencao ';' resposta')' 
+    {
+        $intencao.p.resposta = $resposta.val;
+        ArrayList<Par> aux = $bcIn.get($intencao.p.tipo);
+        if(aux==null) aux = new ArrayList<Par>();
+        aux.add($intencao.p);
+        $bcIn.put($intencao.p.tipo,aux);
+        $bcOut = $bcIn;
+    }
+    ;
+
+intencao returns [Par p]
+        : tipo ',' acao ',' keywords
+        {
+            $intencao.p = new Par();
+            $intencao.p.tipo = $tipo.val;
+            $intencao.p.acoes = $acao.list;
+            $intencao.p.keywords = $keywords.list;
+        }
+        ;
+
+\end{verbatim}
+
+Por outro lado, é importante também nos debruçarmos sobre o processo de resposta.
+
+A produção responsável por responder às questões colocadas é a '\textit{questao}'. Aqui são reconhecidas as várias palavras que compõem uma pergunta que podem já existir na base de conhecimento, nomeadamente, tipos, ações e keywords, mas também palavras que não sejam conhecidas. Cada questão é composta por pelo menos uma palavra e terminada por pelo menos um ponto terminal.
+
+\begin{verbatim}
+
+questao [HashMap<String, ArrayList<Par>> bc]
+@init{
+    ArrayList<String> tipos = new ArrayList<String>();
+    ArrayList<String> acoes = new ArrayList<String>();
+    ArrayList<String> keywords = new ArrayList<String>();
+    ArrayList<String> palavras = new ArrayList<String>();
+    StringBuffer question = new StringBuffer();
+}
+    :( PALAVRA { palavras.add($PALAVRA.text);
+                 question.append($PALAVRA.text).append(" ");
+               } 
+    | tipo { tipos.add($tipo.val); 
+             question.append($tipo.val).append(" ");
+           } 
+    | acao { acoes.add($acao.val); 
+             question.append($acao.val).append(" ");
+           } 
+    | keyword { keywords.add($keyword.val); 
+                question.append($keyword.val).append(" ");
+              } 
+     )+ (PONTOTERMINAL {question.append($PONTOTERMINAL.text);} )+
+     
+    {getAnswer($bc,question,tipos,acoes,keywords,palavras);}
+    ;
+\end{verbatim}
+
+Quando é reconhecida uma pergunta completa, procede-se à tentativa de obtenção de resposta. Esta fica ao encargo do método \texttt{getAnswer} definido no \texttt{@members}. Esta tenta obter um match completo das palavras extraídas da questão, com a parte da intenção dos pares (intencao, resposta) que contêm o conhecimento. Se isto não for possível, tenta otimizar o mais possível.
+
+Exemplificando, para a base de conhecimento abaixo os resultados esperados seriam os seguintes.
+
+\begin{verbatim}
+BC:
+( Quando , pagar , [ propinas ] ; ' Até dia 23 de julho .' )
+( O que , ser , [ ECTS ] ; ' European Credit Transfer System .' )
+( Qual , ser , [ email , diretor ,  curso ] ; ' ddd@ddd.com. ' )
+( Como , aceder , [ calendário , escolar ] ; 
+       ' O calendário escolar está disponível no portal académico. ' )
+( Como , imprimir , [ calendário , escolar ] ; 
+       ' O calendário escolar pode ser imprimido através do portal académico. ' )
+( Onde , inscrever , [ exame , época , especial ] ; 
+       ' Incrições para exame de Época Especial são feitas no portal académico. ' )
+( Onde , inscrever , [ exame , época , recurso ] ; 
+       ' Não é necessária incrição para realizar exame de recurso. ' )
+
+\end{verbatim}
+
+\begin{verbatim}
+
+Gostava de saber quando se pagam as propinas de 2018/19 ...
+R0:' Até dia 23 de julho .'
+
+Siri, diz-me: O QUE SÃO ECTS ?!
+R0:' European Credit Transfer System .'
+
+Qual é o nome do reitor ?
+Não foi encontrada resposta à sua pergunta.
+
+ola, onde nos devemos inscrever para o exame de Época Especial ?
+R0:' Incrições para exame de Época Especial são feitas no portal académico. '
+
+Onde nos devemos inscrever para o exame de Época de Recurso ?
+R0:' Não é necessária incrição para realizar exame de recurso. '
+
+Onde nos devemos inscrever para o exame de recurso ?
+R0:' Não é necessária incrição para realizar exame de recurso. '
+
+Onde nos devemos inscrever para o exame ?
+R0:' Incrições para exame de Época Especial são feitas no portal académico. '
+R1:' Não é necessária incrição para realizar exame de recurso. '
+
+Como aceder para imprimir o calendário escolar ?
+R0:' O calendário escolar está disponível no portal académico. '
+R1:' O calendário escolar pode ser imprimido através do portal académico. '
+\end{verbatim}
+
+
+
+A Gramática de Atributos e versão final do \textit{Q\&A System} com área de conhecimento sendo a FAQ da Universidade do Minho pode ser visualizada em anexo na secção \ref{GA}.
+ 

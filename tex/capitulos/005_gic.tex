@@ -1,0 +1,39 @@
+\qquad É possível identificar duas componentes principais do sistema: a Base de Conhecimento - composta por pares (pergunta,resposta) - e as Questões colocadas pelos utilizadores. Na prática, estas correspondem às seguintes produções definidas na gramática:
+
+\medskip \par \textbf{'bcQAS'}: define a estrutura da base de conhecimento, nomeadamente, pares (intenção, resposta). A intenção é o equivalente à pergunta. Nela estão guardados o tipo (e.g. 'Qual', 'Como', 'Onde'), a ação (e.g.'imprimir', 'inscrever') e as \textit{keywords} associadas (e.g. 'propinas', 'regulamento', 'exame'). Este conhecimento é lido e guardado para possibilitar a resposta às questões. Caso se deseje expandir a base de conhecimento e os novos pares incluam vocabulário novo, apenas é necessário adicionar os termos nas produções 'tipo', 'acao' e 'keyword'.
+
+\begin{verbatim}
+
+    bcQAS: par+
+         ;
+
+    par: '(' intencao ';' resposta')'  
+          ;
+
+    intencao: tipo ',' acao ',' keywords
+            ;
+\end{verbatim}
+
+A partir do excerto da GIC acima, é possível constatar que a base de conhecimento é constituída por pares, cada par com 2 campos separados por um ponto e virgula. O primeiro ('intencao') permite identificar a que perguntas a resposta se pode associar. O segundo ('resposta') contém a frase que deve ser apresentada aos utilizadores caso o sistema considere que a questão colocada está relacionada com este conhecimento. A base de conhecimento é identificada inicialmente pela palavra reservada ``BC:''. Alguns exemplos de pares pergunta-resposta sintaticamente corretos que podem ser adicionados são:
+
+\begin{verbatim}
+    BC:
+    ( Quando , pagar , [ propinas ] ; ' Até dia 23 de julho .' )
+    ( Qual , ser , [ email , diretor ,  curso ] ; ' ddd@ddd.com. ' )
+\end{verbatim}
+
+\medskip\textbf{'questoes'}: define a estrutura das perguntas a responder. Cada questão é composta por palavras que o sistema reconhece, (tipos, acções e \textit{keywords}) que são usadas no processo de obtenção de respostas, por palavras que o sistema não conhece (que podem ser também tipos, ações e keywords com \textit{cases} diferentes, noutros tempo verbais, ou então palavras irrelevantes como por exemplo pronomes), por fim, terminadas com sinais de pontuação (um ou mais pontos de interrogação, exclamação ou finais).
+
+\begin{verbatim}
+
+    questoes: questao+
+            ;
+
+    questao: (PALAVRA | tipo | acao | keyword )+ PONTOTERMINAL+
+           ;
+\end{verbatim}
+
+A secção das questões, para ser reconhecida corretamente, deve ser inicializada pela palavra reservada ``QUESTOES:'', tal como definido na gramática. É possível observar na figura \ref{fig:funcs} vários exemplos de questões sintaticamente corretas.
+
+Encontra-se em anexo na secção \ref{GIC} a Gramática Independente de Contexto para observação mais detalhada.
+

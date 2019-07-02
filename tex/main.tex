@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[a4paper, total={5.2in, 8in}]{geometry}
+\usepackage{graphicx}
+\usepackage{eurosym}
+\usepackage{import}
+\usepackage{float}
+\usepackage{verbatim}
+\usepackage[bottom]{footmisc}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\usepackage[style=numeric]{biblatex}
+\usepackage{csquotes}
+\addbibresource{capitulos/references.bib}
+\DeclareUnicodeCharacter{20AC}{\euro}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+\begin{document}
+
+
+%---- CAPA ------
+\import{capitulos/}{000_capa.tex}
+
+%---- RESUMO -----------
+\import{capitulos/}{001_resumo.tex}
+
+\tableofcontents
+
+%------ INTRODUÇÃO -------------
+\section{Introdução}
+\import{capitulos/}{002_introducao.tex}\label{intro}
+
+%------ ÁREA DE CONHECIMENTO -------------
+\section{Área de Conhecimento}
+\import{capitulos/}{003_area_con.tex}\label{sec:areaCon}
+
+%------ FUNCIONALIDADES ----------------
+\section{Funcionalidades suportadas}
+\import{capitulos/}{004_funcionalidades.tex}\label{sec:funcs}
+
+%----------- GIC -------------
+\section{Gramática Independente de Contexto}\label{sec:gic}
+\import{capitulos/}{005_gic.tex}
+
+
+%------------ GA ------------
+\section{Gramática de Atributos}\label{sec:ga}
+\import{capitulos/}{006_ga.tex}
+
+
+%--------- CONCLUSÃO ----------
+\section{Conclusão} \label{sec:conc}
+\import{capitulos/}{007_conclusao.tex}
+
+%------ BIBLIOGRAFIA ------------
+\printbibliography
+
+%------------- APÊNDICE ------------
+\appendix
+\import{capitulos/}{008_apendice.tex}
+
+
+\end{document}
